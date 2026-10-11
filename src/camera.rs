@@ -1,5 +1,5 @@
 use bevy::{
-    app::{Plugin, Update},
+    app::{Plugin, PostUpdate},
     ecs::{
         component::Component,
         entity::Entity,
@@ -16,7 +16,7 @@ use bevy::{
 pub struct OrbitCameraPlugin;
 impl Plugin for OrbitCameraPlugin {
     fn build(&self, app: &mut bevy::app::App) {
-        app.add_systems(Update, orbit_camera);
+        app.add_systems(PostUpdate, orbit_camera);
     }
 }
 
@@ -43,17 +43,19 @@ fn orbit_camera(
 ) {
     let delta = time.delta_secs();
     let orbit_speed = 1.5;
+    let zoom_speed = 1.;
 
     for (camera, mut transform) in &mut cameras {
         if let Ok((target_transform, mut targetable)) = targetables.get_mut(camera.get()) {
             let mut yaw_direction = 0.;
             let mut pitch_direction = 0.;
+            let mut zoom_direction = 0.;
 
             if keys.pressed(KeyCode::ArrowRight) {
-                yaw_direction += 1.0;
+                yaw_direction += 1.;
             }
             if keys.pressed(KeyCode::ArrowLeft) {
-                yaw_direction -= 1.0;
+                yaw_direction -= 1.;
             }
             if keys.pressed(KeyCode::ArrowUp) {
                 pitch_direction += 1.0;
@@ -61,10 +63,18 @@ fn orbit_camera(
             if keys.pressed(KeyCode::ArrowDown) {
                 pitch_direction -= 1.0;
             }
+            if keys.pressed(KeyCode::Period) {
+                zoom_direction += 1.0;
+            }
+            if keys.pressed(KeyCode::Comma) {
+                zoom_direction -= 1.0;
+            }
 
             targetable.yaw += yaw_direction * orbit_speed * delta;
             targetable.pitch =
                 (targetable.pitch + pitch_direction * orbit_speed * delta).clamp(-1.5, 1.5);
+
+            targetable.radius += zoom_direction * zoom_speed * delta * (targetable.radius);
 
             let horizontal_radius = targetable.radius * targetable.pitch.cos();
             let target_position = target_transform.translation;

@@ -34,7 +34,7 @@ pub fn planet(seed: u64) -> impl Scene {
     bsn! {
         Mesh3d(asset_value(Sphere::new(radius)))
         MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(0.2, 0.5, 1.0)))
-        Transform::from_xyz(10.0, 0.0, 0.0)
+        Transform
         Planet
         OrbitCameraTargetable{radius: 40.}
         Children [
