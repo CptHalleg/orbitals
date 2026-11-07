@@ -1,3 +1,8 @@
+use bevy::app::Update;
+use bevy::camera;
+use bevy::ecs::query::With;
+use bevy::ecs::system::Commands;
+use bevy::log::info;
 use bevy::{
     app::{Plugin, PostUpdate},
     ecs::{
@@ -17,14 +22,29 @@ pub struct FollowCameraPlugin;
 impl Plugin for FollowCameraPlugin {
     fn build(&self, app: &mut bevy::app::App) {
         app.add_systems(PostUpdate, follow_camera);
+        app.add_systems(Update, cycle_follow_camera_target);
     }
 }
 
 #[derive(Component, Clone, Default)]
 pub struct FollowCameraTarget {
-    pub radius: f32,
-    pub yaw: f32,
-    pub pitch: f32,
+    priority: u64,
+
+    radius: f32,
+    yaw: f32,
+    pitch: f32,
+}
+
+impl FollowCameraTarget {
+    pub fn new(radius: f32) -> Self {
+        Self {
+            priority: rand::random(),
+
+            radius,
+            yaw: 0.,
+            pitch: 0.,
+        }
+    }
 }
 
 #[derive(Component, Clone, Default)]
@@ -87,5 +107,50 @@ fn follow_camera(
 
             transform.look_at(target_position, Vec3::Y);
         }
+    }
+}
+
+fn cycle_follow_camera_target(
+    keys: Res<ButtonInput<KeyCode>>,
+    target_query: Query<(Entity, &FollowCameraTarget), Without<FollowCamera>>,
+    camera_query: Query<(Entity, &FollowCamera), Without<FollowCameraTarget>>,
+    mut commands: Commands,
+) {
+    if !keys.just_pressed(KeyCode::Tab) {
+        return;
+    }
+
+    let mut targets = target_query
+        .iter()
+        .collect::<Vec<(Entity, &FollowCameraTarget)>>();
+
+    targets.sort_by_key(|(_, target)| target.priority);
+
+    if targets.is_empty() {
+        return;
+    }
+
+    for (camera_entity, camera) in &camera_query {
+        let Ok((_, current_target)) = target_query.get(camera.get()) else {
+            info!("target not found");
+            commands
+                .entity(camera_entity)
+                .insert(FollowCamera(targets[0].0));
+            continue;
+        };
+
+        let current_key = (current_target.priority, camera.get());
+
+        let Ok(index) = targets
+            .binary_search_by_key(&current_key, |(entity, target)| (target.priority, *entity))
+        else {
+            info!("current key not found");
+            continue;
+        };
+
+        let next_target = targets[(index + 1) % targets.len()].0;
+        commands
+            .entity(camera_entity)
+            .insert(FollowCamera(next_target));
     }
 }

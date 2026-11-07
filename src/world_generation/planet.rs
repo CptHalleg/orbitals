@@ -43,9 +43,9 @@ impl WorldGenerator for PlanetGenerator {
     }
 
     fn generate(self) -> impl Scene {
+        let generator = self;
         let mut sectors_positions = Vec::new();
-        let radius = self.size;
-        let mut last_position = Vec3::new(radius, 0., 0.);
+        let mut last_position = Vec3::new(generator.size, 0., 0.);
 
         for _ in 0..10 {
             sectors_positions.push(last_position);
@@ -63,20 +63,19 @@ impl WorldGenerator for PlanetGenerator {
             })
             .collect::<Vec<_>>();
 
-        let generator = self;
         bsn! {
-            Mesh3d(asset_value(Sphere::new(radius)))
+            Mesh3d(asset_value(Sphere::new(generator.size)))
             MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(0.2, 0.5, 1.0)))
             Transform
-            Planet { generator }
-            FollowCameraTarget{radius: 40.}
+            FollowCameraTarget::new(generator.size * 2.)
             Orbiting()
             Children [
                 {sectors}
                 --
-                Transform::from_xyz(0., radius +1., 0.)
+                Transform::from_xyz(0., generator.size + 1., 0.)
                 Text2d("N")
             ]
+            Planet { generator }
         }
     }
 }
