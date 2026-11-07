@@ -1,4 +1,4 @@
-use crate::camera::FollowCameraTarget;
+use crate::follow_camera::FollowCameraTarget;
 use crate::world_generation::WorldGeneratable;
 use crate::world_generation::WorldGenerator;
 use bevy::asset::asset_value;
@@ -38,10 +38,11 @@ impl WorldGenerator for SunGenerator {
 
     fn generate(self) -> impl bevy::scene::prelude::Scene {
         let generator = self;
+        let camera_radius = generator.size * 2.;
         bsn! {
             MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(1., 0.1, 0.1)))
-            Mesh3d(asset_value(Sphere::new(50.)))
-            FollowCameraTarget{radius: 40.}
+            Mesh3d(asset_value(Sphere::new(generator.size)))
+            FollowCameraTarget{radius: camera_radius}
             PointLight {
                 color: Color::srgb(1.,1.,0.1),
                 intensity: 1_000_000_000.,

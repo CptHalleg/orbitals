@@ -1,4 +1,4 @@
-use crate::camera::FollowCameraTarget;
+use crate::follow_camera::FollowCameraTarget;
 use crate::orbiting::Orbiting;
 use crate::sphere_math::move_in_direction;
 use crate::world_generation::WorldGeneratable;

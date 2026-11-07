@@ -1,4 +1,4 @@
-use crate::camera::{FollowCameraPlugin, FollowCameras};
+use crate::follow_camera::{FollowCameraPlugin, FollowCameras};
 use crate::orbiting::OrbitingPlugin;
 use crate::skybox::SkyboxPlugin;
 use crate::world_generation::WorldGenerator;
@@ -7,7 +7,7 @@ use bevy::light::Skybox;
 use bevy::prelude::*;
 use rand::Rng;
 
-mod camera;
+mod follow_camera;
 mod orbiting;
 mod skybox;
 mod sphere_math;
