@@ -1,4 +1,7 @@
+use crate::follow_camera::FollowCamera;
+use crate::follow_camera::FollowCameraPlugin;
 use crate::follow_camera::FollowCameraTarget;
+use crate::follow_camera::FollowCameras;
 use crate::world_generation::WorldGeneratable;
 use crate::world_generation::WorldGenerator;
 use bevy::asset::asset_value;

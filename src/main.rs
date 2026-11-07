@@ -1,9 +1,10 @@
-use crate::follow_camera::{FollowCameraPlugin, FollowCameras};
+use crate::follow_camera::FollowCameraPlugin;
+use crate::follow_camera::FollowCameras;
 use crate::orbiting::OrbitingPlugin;
+use crate::skybox::SkyboxConfig;
 use crate::skybox::SkyboxPlugin;
 use crate::world_generation::WorldGenerator;
 use crate::world_generation::solar_system::SolarSystemGenerator;
-use bevy::light::Skybox;
 use bevy::prelude::*;
 use bevy_inspector_egui::bevy_egui::EguiGlobalSettings;
 use bevy_inspector_egui::{bevy_egui::EguiPlugin, quick::WorldInspectorPlugin};
@@ -28,16 +29,28 @@ fn main() {
         .run();
 }
 
-fn setup(asset_server: Res<AssetServer>, mut commands: Commands) {
+pub fn camera_entity() -> impl Scene {
+    bsn! {
+        FollowCameras [
+            Transform
+            SkyboxConfig {
+                image: "cubemap_stacked.png",
+                brightness: 1000.0,
+            }
+            Camera3d
+            Camera{order:0}
+        ]
+    }
+}
+
+fn setup(mut commands: Commands) {
     let mut rng = rand::rng();
+
+    commands.spawn_scene(camera_entity());
     commands.spawn_scene(SolarSystemGenerator::new_from_seed(rng.next_u64()).generate());
 }
 
-fn inspector_setup(
-    asset_server: Res<AssetServer>,
-    mut commands: Commands,
-    mut egui_settings: ResMut<EguiGlobalSettings>,
-) {
+fn inspector_setup(mut egui_settings: ResMut<EguiGlobalSettings>) {
     egui_settings
         .input_system_settings
         .run_write_keyboard_input_messages_system = false;

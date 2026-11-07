@@ -1,8 +1,7 @@
 use crate::skybox::SkyboxConfig;
 use bevy::app::Update;
 use bevy::camera;
-use bevy::camera::Camera;
-use bevy::camera::Camera3d;
+use bevy::camera::{Camera, Camera3d};
 use bevy::ecs::query::With;
 use bevy::ecs::system::Commands;
 use bevy::light::Skybox;
@@ -159,16 +158,4 @@ fn cycle_follow_camera_target(
             .entity(camera_entity)
             .insert(FollowCamera(next_target));
     }
-}
-
-pub fn new() -> impl Scene {
-    bsn! {
-        Transform
-        SkyboxConfig {
-            image: "cubemap_stacked.png",
-            brightness: 1000.0,
-        }
-        Camera3d
-        Camera{order:0}
-    };
 }
