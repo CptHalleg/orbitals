@@ -1,5 +1,5 @@
 use crate::Orbiting;
-use crate::camera::OrbitCameraTargetable;
+use crate::camera::CameraTarget;
 use crate::sphere_math::move_in_direction;
 use crate::world_generation::WorldGeneratable;
 use bevy::asset::asset_value;
@@ -61,7 +61,7 @@ impl WorldGeneratable for PlanetGenerator {
             MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(0.2, 0.5, 1.0)))
             Transform
             Planet
-            OrbitCameraTargetable{radius: 40.}
+            CameraTarget{radius: 40.}
             Orbiting()
             Children [
                 {sectors}

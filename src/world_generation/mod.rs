@@ -3,7 +3,7 @@ use rand::RngExt;
 use rand::{SeedableRng, rngs::StdRng};
 
 use crate::Orbiting;
-use crate::camera::OrbitCameraTargetable;
+use crate::camera::CameraTarget;
 use crate::sphere_math::move_in_direction;
 use rand::Rng;
 

@@ -13,36 +13,36 @@ use bevy::{
     transform::components::Transform,
 };
 
-pub struct OrbitCameraPlugin;
-impl Plugin for OrbitCameraPlugin {
+pub struct FollowCameraPlugin;
+impl Plugin for FollowCameraPlugin {
     fn build(&self, app: &mut bevy::app::App) {
-        app.add_systems(PostUpdate, orbit_camera);
+        app.add_systems(PostUpdate, follow_camera);
     }
 }
 
 #[derive(Component, Clone, Default)]
-pub struct OrbitCameraTargetable {
+pub struct CameraTarget {
     pub radius: f32,
     pub yaw: f32,
     pub pitch: f32,
 }
 
 #[derive(Component, Clone, Default)]
-#[relationship_target(relationship = OrbitCamera)]
-pub struct OrbitCameras(Vec<Entity>);
+#[relationship_target(relationship = FollowCamera)]
+pub struct FollowCameras(Vec<Entity>);
 
 #[derive(Component, Clone)]
-#[relationship(relationship_target = OrbitCameras)]
-pub struct OrbitCamera(Entity);
+#[relationship(relationship_target = FollowCameras)]
+pub struct FollowCamera(Entity);
 
-fn orbit_camera(
+fn follow_camera(
     keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
-    mut cameras: Query<(&OrbitCamera, &mut Transform)>,
-    mut targetables: Query<(&Transform, &mut OrbitCameraTargetable), Without<OrbitCamera>>,
+    mut cameras: Query<(&FollowCamera, &mut Transform)>,
+    mut targetables: Query<(&Transform, &mut CameraTarget), Without<FollowCamera>>,
 ) {
     let delta = time.delta_secs();
-    let orbit_speed = 1.5;
+    let rotation_speed = 1.5;
     let zoom_speed = 1.;
 
     for (camera, mut transform) in &mut cameras {
@@ -70,9 +70,9 @@ fn orbit_camera(
                 zoom_direction -= 1.0;
             }
 
-            targetable.yaw += yaw_direction * orbit_speed * delta;
+            targetable.yaw += yaw_direction * rotation_speed * delta;
             targetable.pitch =
-                (targetable.pitch + pitch_direction * orbit_speed * delta).clamp(-1.5, 1.5);
+                (targetable.pitch + pitch_direction * rotation_speed * delta).clamp(-1.5, 1.5);
 
             targetable.radius += zoom_direction * zoom_speed * delta * (targetable.radius);
 

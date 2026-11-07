@@ -1,4 +1,4 @@
-use crate::camera::OrbitCameraTargetable;
+use crate::camera::CameraTarget;
 use crate::world_generation::WorldGeneratable;
 use bevy::asset::asset_value;
 use bevy::color::Color;
@@ -32,7 +32,7 @@ impl WorldGeneratable for SunGenerator {
         bsn! {
             MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(1., 0.1, 0.1)))
             Mesh3d(asset_value(Sphere::new(50.)))
-            OrbitCameraTargetable{radius: 40.}
+            CameraTarget{radius: 40.}
             PointLight {
                 color: Color::srgb(1.,1.,0.1),
                 intensity: 1_000_000_000.,

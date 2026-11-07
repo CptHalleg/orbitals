@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use rand::RngExt;
 use world_generation::planet;
 
-use crate::camera::{OrbitCameraPlugin, OrbitCameras};
+use crate::camera::{FollowCameraPlugin, FollowCameras};
 use crate::skybox::SkyboxPlugin;
 use crate::world_generation::WorldGeneratable;
 use crate::world_generation::solar_system::SolarSystem;
@@ -19,7 +19,7 @@ mod world_generation;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(OrbitCameraPlugin)
+        .add_plugins(FollowCameraPlugin)
         .add_plugins(SkyboxPlugin)
         .add_systems(Startup, setup)
         .add_systems(Update, orbiting)
@@ -30,7 +30,7 @@ fn setup(asset_server: Res<AssetServer>, mut commands: Commands) {
     let skybox_handle = asset_server.load("cubemap_stacked.png");
     let mut rng = rand::rng();
     let scene = bsn! {
-        OrbitCameras [
+        FollowCameras [
             Transform
             Skybox {
                 image: Option::Some(skybox_handle),
