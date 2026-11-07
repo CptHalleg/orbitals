@@ -1,5 +1,5 @@
-use crate::Orbiting;
 use crate::camera::CameraTarget;
+use crate::orbiting::Orbiting;
 use crate::sphere_math::move_in_direction;
 use crate::world_generation::WorldGeneratable;
 use bevy::asset::asset_value;
