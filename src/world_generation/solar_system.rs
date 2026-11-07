@@ -4,6 +4,7 @@ use crate::world_generation::planet::PlanetGenerator;
 use crate::world_generation::sun::SunGenerator;
 use bevy::ecs::component::Component;
 use bevy::ecs::hierarchy::Children;
+use bevy::ecs::name::Name;
 use bevy::scene::Scene;
 use bevy::scene::bsn;
 use rand::Rng;
@@ -48,6 +49,7 @@ impl WorldGenerator for SolarSystemGenerator {
         let sun = SunGenerator::new_from_seed(self.sun_seed).generate();
         let generator = self;
         bsn! {
+            Name("SolarSystem")
             SolarSystem { generator }
             Children[
                 @{ sun }

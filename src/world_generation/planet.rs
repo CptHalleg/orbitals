@@ -7,6 +7,7 @@ use bevy::asset::asset_value;
 use bevy::color::Color;
 use bevy::ecs::component::Component;
 use bevy::ecs::hierarchy::Children;
+use bevy::ecs::name::Name;
 use bevy::math::Vec3;
 use bevy::mesh::Mesh3d;
 use bevy::pbr::MeshMaterial3d;
@@ -64,6 +65,7 @@ impl WorldGenerator for PlanetGenerator {
             .collect::<Vec<_>>();
 
         bsn! {
+            Name("Planet")
             Mesh3d(asset_value(Sphere::new(generator.size)))
             MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(0.2, 0.5, 1.0)))
             Transform

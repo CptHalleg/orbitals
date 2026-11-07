@@ -1,5 +1,6 @@
 use crate::follow_camera::FollowCameraPlugin;
 use crate::follow_camera::FollowCameras;
+use crate::follow_camera::camera_entity;
 use crate::orbiting::OrbitingPlugin;
 use crate::skybox::SkyboxConfig;
 use crate::skybox::SkyboxPlugin;
@@ -29,24 +30,8 @@ fn main() {
         .run();
 }
 
-pub fn camera_entity() -> impl Scene {
-    bsn! {
-        FollowCameras [
-            Transform
-            SkyboxConfig {
-                image: "cubemap_stacked.png",
-                brightness: 1000.0,
-            }
-            Camera3d
-            Camera{order:0}
-        ]
-    }
-}
-
 fn setup(mut commands: Commands) {
     let mut rng = rand::rng();
-
-    commands.spawn_scene(camera_entity());
     commands.spawn_scene(SolarSystemGenerator::new_from_seed(rng.next_u64()).generate());
 }
 

@@ -1,13 +1,13 @@
 use crate::follow_camera::FollowCamera;
-use crate::follow_camera::FollowCameraPlugin;
 use crate::follow_camera::FollowCameraTarget;
 use crate::follow_camera::FollowCameras;
+use crate::follow_camera::camera_entity;
 use crate::world_generation::WorldGeneratable;
 use crate::world_generation::WorldGenerator;
 use bevy::asset::asset_value;
-use bevy::camera;
 use bevy::color::Color;
 use bevy::ecs::component::Component;
+use bevy::ecs::name::Name;
 use bevy::light::PointLight;
 use bevy::mesh::Mesh3d;
 use bevy::pbr::MeshMaterial3d;
@@ -43,6 +43,7 @@ impl WorldGenerator for SunGenerator {
     fn generate(self) -> impl bevy::scene::prelude::Scene {
         let generator = self;
         bsn! {
+            Name("Sun")
             MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(1., 0.1, 0.1)))
             Mesh3d(asset_value(Sphere::new(generator.size)))
             FollowCameraTarget::new(generator.size * 2.)
@@ -52,6 +53,9 @@ impl WorldGenerator for SunGenerator {
                 range: 10_000.,
             }
             Sun { generator }
+            FollowCameras [
+                @{ camera_entity() }
+            ]
         }
     }
 }

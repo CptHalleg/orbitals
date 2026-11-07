@@ -1,10 +1,8 @@
 use crate::skybox::SkyboxConfig;
 use bevy::app::Update;
-use bevy::camera;
-use bevy::camera::{Camera, Camera3d};
-use bevy::ecs::query::With;
+use bevy::camera::Camera;
+use bevy::camera::Camera3d;
 use bevy::ecs::system::Commands;
-use bevy::light::Skybox;
 use bevy::log::info;
 use bevy::scene::Scene;
 use bevy::scene::bsn;
@@ -136,6 +134,8 @@ fn cycle_follow_camera_target(
     }
 
     for (camera_entity, camera) in &camera_query {
+        info!("target: {}", camera.get());
+
         let Ok((_, current_target)) = target_query.get(camera.get()) else {
             info!("target not found");
             commands
@@ -157,5 +157,19 @@ fn cycle_follow_camera_target(
         commands
             .entity(camera_entity)
             .insert(FollowCamera(next_target));
+    }
+}
+
+pub fn camera_entity() -> impl Scene {
+    bsn! {
+        FollowCameras [
+            Transform
+            SkyboxConfig {
+                image: "cubemap_stacked.png",
+                brightness: 1000.0,
+            }
+            Camera3d
+            Camera{order:0}
+        ]
     }
 }
