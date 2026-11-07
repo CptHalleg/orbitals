@@ -1,4 +1,5 @@
 use crate::world_generation::WorldGeneratable;
+use crate::world_generation::WorldGenerator;
 use crate::world_generation::planet::PlanetGenerator;
 use bevy::ecs::component::Component;
 use bevy::ecs::hierarchy::Children;
@@ -10,12 +11,20 @@ use rand::SeedableRng;
 use rand::rngs::StdRng;
 
 #[derive(Component, Clone, Default)]
-pub struct SolarSystem;
+pub struct SolarSystem {
+    generator: SolarSystemGenerator,
+}
+
+impl WorldGeneratable for SolarSystem {}
+
+#[derive(Clone, Default)]
 pub struct SolarSystemGenerator {
     planet_seeds: Vec<u64>,
 }
 
-impl WorldGeneratable for SolarSystemGenerator {
+impl WorldGenerator for SolarSystemGenerator {
+    type Generatable = SolarSystem;
+
     fn new_from_seed(seed: u64) -> Self {
         let mut rng = StdRng::seed_from_u64(seed);
         let planet_amout = rng.random_range(0..10);
@@ -30,8 +39,9 @@ impl WorldGeneratable for SolarSystemGenerator {
             .into_iter()
             .map(|s| PlanetGenerator::new_from_seed(s.clone()).generate())
             .collect::<Vec<_>>();
+        let generator = self;
         bsn! {
-            SolarSystem
+            SolarSystem { generator }
             Children[
                 { planets }
             ]

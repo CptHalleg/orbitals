@@ -1,7 +1,8 @@
-use crate::camera::CameraTarget;
+use crate::camera::FollowCameraTarget;
 use crate::orbiting::Orbiting;
 use crate::sphere_math::move_in_direction;
 use crate::world_generation::WorldGeneratable;
+use crate::world_generation::WorldGenerator;
 use bevy::asset::asset_value;
 use bevy::color::Color;
 use bevy::ecs::component::Component;
@@ -21,13 +22,19 @@ use rand::SeedableRng;
 use rand::rngs::StdRng;
 
 #[derive(Component, Clone, Default)]
-pub struct Planet;
+pub struct Planet {
+    generator: PlanetGenerator,
+}
 
+impl WorldGeneratable for Planet {}
+
+#[derive(Clone, Default)]
 pub struct PlanetGenerator {
     size: f32,
 }
 
-impl WorldGeneratable for PlanetGenerator {
+impl WorldGenerator for PlanetGenerator {
+    type Generatable = Planet;
     fn new_from_seed(seed: u64) -> Self {
         let mut rng = StdRng::seed_from_u64(seed);
         Self {
@@ -56,12 +63,13 @@ impl WorldGeneratable for PlanetGenerator {
             })
             .collect::<Vec<_>>();
 
+        let generator = self;
         bsn! {
             Mesh3d(asset_value(Sphere::new(radius)))
             MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(0.2, 0.5, 1.0)))
             Transform
-            Planet
-            CameraTarget{radius: 40.}
+            Planet { generator }
+            FollowCameraTarget{radius: 40.}
             Orbiting()
             Children [
                 {sectors}

@@ -21,7 +21,7 @@ impl Plugin for FollowCameraPlugin {
 }
 
 #[derive(Component, Clone, Default)]
-pub struct CameraTarget {
+pub struct FollowCameraTarget {
     pub radius: f32,
     pub yaw: f32,
     pub pitch: f32,
@@ -39,7 +39,7 @@ fn follow_camera(
     keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
     mut cameras: Query<(&FollowCamera, &mut Transform)>,
-    mut targetables: Query<(&Transform, &mut CameraTarget), Without<FollowCamera>>,
+    mut targetables: Query<(&Transform, &mut FollowCameraTarget), Without<FollowCamera>>,
 ) {
     let delta = time.delta_secs();
     let rotation_speed = 1.5;

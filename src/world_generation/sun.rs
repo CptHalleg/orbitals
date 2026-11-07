@@ -1,5 +1,6 @@
-use crate::camera::CameraTarget;
+use crate::camera::FollowCameraTarget;
 use crate::world_generation::WorldGeneratable;
+use crate::world_generation::WorldGenerator;
 use bevy::asset::asset_value;
 use bevy::color::Color;
 use bevy::ecs::component::Component;
@@ -14,13 +15,20 @@ use rand::SeedableRng;
 use rand::rngs::StdRng;
 
 #[derive(Component, Clone, Default)]
-pub struct Planet;
+pub struct Sun {
+    generator: SunGenerator,
+}
 
+impl WorldGeneratable for Sun {}
+
+#[derive(Clone, Default)]
 pub struct SunGenerator {
     size: f32,
 }
 
-impl WorldGeneratable for SunGenerator {
+impl WorldGenerator for SunGenerator {
+    type Generatable = Sun;
+
     fn new_from_seed(seed: u64) -> Self {
         let mut rng = StdRng::seed_from_u64(seed);
         Self {
@@ -29,15 +37,17 @@ impl WorldGeneratable for SunGenerator {
     }
 
     fn generate(self) -> impl bevy::scene::prelude::Scene {
+        let generator = self;
         bsn! {
             MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(1., 0.1, 0.1)))
             Mesh3d(asset_value(Sphere::new(50.)))
-            CameraTarget{radius: 40.}
+            FollowCameraTarget{radius: 40.}
             PointLight {
                 color: Color::srgb(1.,1.,0.1),
                 intensity: 1_000_000_000.,
                 range: 10_000.,
             }
+            Sun { generator }
         }
     }
 }
