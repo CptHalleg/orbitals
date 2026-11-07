@@ -12,6 +12,12 @@ impl Plugin for SkyboxPlugin {
     }
 }
 
+#[derive(Component, Clone, Default)]
+pub struct SkyboxConfig {
+    pub image: &'static str,
+    pub brightness: f32,
+}
+
 fn configure_skybox(
     mut image_events: MessageReader<AssetEvent<Image>>,
     mut images: ResMut<Assets<Image>>,

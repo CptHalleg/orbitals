@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 bevy = "0.20"
+bevy-inspector-egui = "0.38"
 rand = "0.10.3"
