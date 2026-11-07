@@ -1,0 +1,43 @@
+use crate::camera::OrbitCameraTargetable;
+use crate::world_generation::WorldGeneratable;
+use bevy::asset::asset_value;
+use bevy::color::Color;
+use bevy::ecs::component::Component;
+use bevy::light::PointLight;
+use bevy::mesh::Mesh3d;
+use bevy::pbr::MeshMaterial3d;
+use bevy::pbr::StandardMaterial;
+use bevy::scene::bsn;
+use bevy::shape::Sphere;
+use rand::Rng;
+use rand::SeedableRng;
+use rand::rngs::StdRng;
+
+#[derive(Component, Clone, Default)]
+pub struct Planet;
+
+pub struct SunGenerator {
+    size: f32,
+}
+
+impl WorldGeneratable for SunGenerator {
+    fn new_from_seed(seed: u64) -> Self {
+        let mut rng = StdRng::seed_from_u64(seed);
+        Self {
+            size: rng.next_u32() as f32,
+        }
+    }
+
+    fn generate(self) -> impl bevy::scene::prelude::Scene {
+        bsn! {
+            MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(1., 0.1, 0.1)))
+            Mesh3d(asset_value(Sphere::new(50.)))
+            OrbitCameraTargetable{radius: 40.}
+            PointLight {
+                color: Color::srgb(1.,1.,0.1),
+                intensity: 1_000_000_000.,
+                range: 10_000.,
+            }
+        }
+    }
+}

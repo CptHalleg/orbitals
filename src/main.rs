@@ -4,10 +4,12 @@ use bevy::prelude::*;
 use rand::RngExt;
 use world_generation::planet;
 
-use crate::camera::OrbitCameraTargetable;
 use crate::camera::{OrbitCameraPlugin, OrbitCameras};
 use crate::skybox::SkyboxPlugin;
-use std::f32::consts::PI;
+use crate::world_generation::WorldGeneratable;
+use crate::world_generation::solar_system::SolarSystem;
+use crate::world_generation::solar_system::SolarSystemGenerator;
+use crate::world_generation::sun;
 
 mod camera;
 mod skybox;
@@ -27,11 +29,7 @@ fn main() {
 fn setup(asset_server: Res<AssetServer>, mut commands: Commands) {
     let skybox_handle = asset_server.load("cubemap_stacked.png");
     let mut rng = rand::rng();
-    let scene = bsn_list! {
-        #Sun
-        MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(1., 0.1, 0.1)))
-        Mesh3d(asset_value(Sphere::new(50.)))
-        OrbitCameraTargetable{radius: 40.}
+    let scene = bsn! {
         OrbitCameras [
             Transform
             Skybox {
@@ -41,25 +39,9 @@ fn setup(asset_server: Res<AssetServer>, mut commands: Commands) {
             Camera3d
             Camera{order:0}
         ]
-        PointLight {
-            color: Color::srgb(1.,1.,0.1),
-            intensity: 1_000_000_000.,
-            range: 10_000.,
-        }
-        --
-        #Earth
-        @planet(rng.random())
-        Orbiting {
-            first_axis: Vec3::new(500., 50., 0.),
-            second_axis: Vec3::new(0., 0., 200.),
-
-            phase: 0.,
-            period: (2. * PI),
-        }
-        Transform{translation: Vec3::new(100., 0. , 0.)}
-        ChildOf(#Sun)
     };
-    commands.spawn_scene_list(scene);
+    commands.spawn_scene(scene);
+    commands.spawn_scene(SolarSystemGenerator::new_from_seed(0).generate());
 }
 
 #[derive(Component, Clone, Default)]

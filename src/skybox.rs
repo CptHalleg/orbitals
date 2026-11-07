@@ -29,6 +29,7 @@ fn configure_skybox(
                 .as_ref()
                 .is_some_and(|handle| handle.id() == id)
         });
+
         if !is_skybox_image {
             continue;
         }
@@ -36,6 +37,7 @@ fn configure_skybox(
         let Some(mut image) = images.get_mut(id) else {
             continue;
         };
+
         if image.texture_descriptor.array_layer_count() != 1 {
             continue;
         }
@@ -44,6 +46,7 @@ fn configure_skybox(
             error!("Failed to reinterpret skybox image as six layers: {error}");
             continue;
         }
+
         image.texture_view_descriptor = Some(TextureViewDescriptor {
             dimension: Some(TextureViewDimension::Cube),
             ..default()
