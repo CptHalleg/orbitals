@@ -60,7 +60,15 @@ impl Orbit {
 
     pub fn position(&self, time: f32) -> Vec3 {
         let new_angle = self.phase + (time / self.period);
-        self.major_axis() * sin(new_angle) + self.minor_axis() * cos(new_angle)
+        self.position_at_angle(new_angle)
+    }
+
+    fn position_at_angle(&self, angle: f32) -> Vec3 {
+        let focus_distance =
+            (self.major_length.powi(2) - self.minor_length.powi(2)).max(0.0).sqrt();
+        let focus_offset = self.orientation * Vec3::X * focus_distance;
+
+        self.major_axis() * sin(angle) + self.minor_axis() * cos(angle) - focus_offset
     }
 }
 
@@ -91,8 +99,8 @@ fn draw_orbits(mut gizmos: Gizmos, orbiting_query: Query<&Orbiting>) {
             let angle_a = TAU * segment as f32 / SEGMENTS as f32;
             let angle_b = TAU * (segment + 1) as f32 / SEGMENTS as f32;
 
-            let point_a = orbit.major_axis() * sin(angle_a) + orbit.minor_axis() * cos(angle_a);
-            let point_b = orbit.major_axis() * sin(angle_b) + orbit.minor_axis() * cos(angle_b);
+            let point_a = orbit.position_at_angle(angle_a);
+            let point_b = orbit.position_at_angle(angle_b);
 
             gizmos.line(point_a, point_b, Color::srgb(0.2, 0.8, 1.0));
         }

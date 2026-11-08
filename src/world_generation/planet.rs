@@ -67,7 +67,7 @@ fn random_orbit(rng: &mut StdRng) -> Orbit {
         }
     };
     let major_length = rng.random_range(300.0..5000.0);
-    let minor_length = major_length * rng.random_range(0.9..0.99);
+    let minor_length = major_length * rng.random_range(0.99..0.99999);
 
     Orbit::new(
         plane_normal,
