@@ -108,14 +108,14 @@ fn draw_predictables<T>(time: Res<Time>, mut gizmos: Gizmos, predictable_query: 
 where
     T: Component + Predictable,
 {
+    const SEGMENTS_PER_SECOND: f32 = 2.;
     for predictable in &predictable_query {
-        const SEGMENTS: usize = 128;
-
         let now = time.elapsed_secs();
         let cycle_duration = predictable.cycle_duration();
-        for i in 0..SEGMENTS {
-            let time_a = now + ((cycle_duration * (i as f32)) / (SEGMENTS as f32));
-            let time_b = now + ((cycle_duration * ((i + 1) as f32)) / (SEGMENTS as f32));
+        let segments = (cycle_duration * SEGMENTS_PER_SECOND).ceil() as usize;
+        for i in 0..segments {
+            let time_a = now + ((cycle_duration * (i as f32)) / (segments as f32));
+            let time_b = now + ((cycle_duration * ((i + 1) as f32)) / (segments as f32));
 
             gizmos.line(
                 predictable.position_at(time_a),
