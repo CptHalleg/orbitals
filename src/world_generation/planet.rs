@@ -23,6 +23,7 @@ use rand::RngExt;
 use rand::SeedableRng;
 use rand::rngs::StdRng;
 use std::f32::consts::TAU;
+use std::ops::Range;
 
 #[derive(Component, Clone, Default)]
 pub struct Planet {
@@ -33,6 +34,13 @@ impl WorldGeneratable for Planet {}
 
 #[derive(Clone, Default)]
 pub struct PlanetGenerator {
+    size: f32,
+    orbit: Orbit,
+    moons: Vec<MoonGenerator>,
+}
+
+#[derive(Clone, Default)]
+struct MoonGenerator {
     size: f32,
     orbit: Orbit,
 }
@@ -51,7 +59,11 @@ fn random_vector(rng: &mut StdRng) -> Vec3 {
     }
 }
 
-fn random_orbit(rng: &mut StdRng) -> Orbit {
+fn random_orbit(
+    rng: &mut StdRng,
+    major_length_range: Range<f32>,
+    period_range: Range<f32>,
+) -> Orbit {
     let plane_normal = Vec3::new(
         rng.random_range(-0.1..0.1),
         1.0,
@@ -66,7 +78,7 @@ fn random_orbit(rng: &mut StdRng) -> Orbit {
             break bevy::math::Dir3::new(direction.normalize()).unwrap();
         }
     };
-    let major_length = rng.random_range(300.0..5000.0);
+    let major_length = rng.random_range(major_length_range);
     let minor_length = major_length * rng.random_range(0.99..0.99999);
 
     Orbit::new(
@@ -75,7 +87,7 @@ fn random_orbit(rng: &mut StdRng) -> Orbit {
         major_length,
         minor_length,
         rng.random_range(0.0..TAU),
-        rng.random_range(10.0..30.0),
+        rng.random_range(period_range),
     )
 }
 
@@ -83,10 +95,19 @@ impl WorldGenerator for PlanetGenerator {
     type Generatable = Planet;
     fn new_from_seed(seed: u64) -> Self {
         let mut rng = StdRng::seed_from_u64(seed);
+        let size = rng.random_range(5..15) as f32;
+        let moon_count = rng.random_range(1..=3);
+        let moons = (0..moon_count)
+            .map(|_| MoonGenerator {
+                size: rng.random_range(size * 0.15..size * 0.3),
+                orbit: random_orbit(&mut rng, size * 1.8..size * 3.2, 2.0..6.0),
+            })
+            .collect();
 
         Self {
-            size: rng.random_range(5..15) as f32,
-            orbit: random_orbit(&mut rng),
+            size,
+            orbit: random_orbit(&mut rng, 300.0..5000.0, 10.0..30.0),
+            moons,
         }
     }
 
@@ -111,6 +132,22 @@ impl WorldGenerator for PlanetGenerator {
             })
             .collect::<Vec<_>>();
 
+        let moons = generator
+            .moons
+            .iter()
+            .map(|moon| {
+                bsn! {
+                    Name("Moon")
+                    Mesh3d(asset_value(Sphere::new(moon.size)))
+                    MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(0.55, 0.55, 0.58)))
+                    Transform
+                    Orbiting {
+                        orbit: { moon.orbit.clone() }
+                    }
+                }
+            })
+            .collect::<Vec<_>>();
+
         bsn! {
             Name("Planet")
             Mesh3d(asset_value(Sphere::new(generator.size)))
@@ -122,6 +159,8 @@ impl WorldGenerator for PlanetGenerator {
             }
             Children [
                 {sectors}
+                --
+                {moons}
                 --
                 Transform::from_xyz(0., generator.size + 1., 0.)
                 Text2d("N")

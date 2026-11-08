@@ -3,6 +3,7 @@ use crate::predictable::draw_predictables;
 use crate::predictable::update_predictables;
 use bevy::math::ops::{cos, sin};
 use bevy::prelude::*;
+use bevy::transform::TransformSystems;
 use std::f32::consts::TAU;
 
 pub struct OrbitingPlugin;
@@ -10,7 +11,10 @@ pub struct OrbitingPlugin;
 impl Plugin for OrbitingPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, update_predictables::<Orbiting>);
-        app.add_systems(Update, draw_predictables::<Orbiting>);
+        app.add_systems(
+            PostUpdate,
+            draw_predictables::<Orbiting>.after(TransformSystems::Propagate),
+        );
     }
 }
 
