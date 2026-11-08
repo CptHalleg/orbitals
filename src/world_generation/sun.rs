@@ -8,13 +8,16 @@ use bevy::asset::asset_value;
 use bevy::color::Color;
 use bevy::ecs::component::Component;
 use bevy::ecs::name::Name;
+use bevy::image::TranscodeFormat;
 use bevy::light::PointLight;
 use bevy::mesh::Mesh3d;
 use bevy::pbr::MeshMaterial3d;
 use bevy::pbr::StandardMaterial;
 use bevy::scene::bsn;
 use bevy::shape::Sphere;
+use bevy::transform::components::Transform;
 use rand::Rng;
+use rand::RngExt;
 use rand::SeedableRng;
 use rand::rngs::StdRng;
 
@@ -36,7 +39,7 @@ impl WorldGenerator for SunGenerator {
     fn new_from_seed(seed: u64) -> Self {
         let mut rng = StdRng::seed_from_u64(seed);
         Self {
-            size: rng.next_u32() as f32,
+            size: rng.random_range(100..200) as f32,
         }
     }
 
@@ -44,6 +47,7 @@ impl WorldGenerator for SunGenerator {
         let generator = self;
         bsn! {
             Name("Sun")
+            Transform
             MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(1., 0.1, 0.1)))
             Mesh3d(asset_value(Sphere::new(generator.size)))
             FollowCameraTarget::new(generator.size * 2.)

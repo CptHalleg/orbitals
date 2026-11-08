@@ -2,11 +2,13 @@ use crate::world_generation::WorldGeneratable;
 use crate::world_generation::WorldGenerator;
 use crate::world_generation::planet::PlanetGenerator;
 use crate::world_generation::sun::SunGenerator;
+use bevy::camera::visibility::InheritedVisibility;
 use bevy::ecs::component::Component;
 use bevy::ecs::hierarchy::Children;
 use bevy::ecs::name::Name;
 use bevy::scene::Scene;
 use bevy::scene::bsn;
+use bevy::transform::components::Transform;
 use rand::Rng;
 use rand::RngExt;
 use rand::SeedableRng;
@@ -30,7 +32,7 @@ impl WorldGenerator for SolarSystemGenerator {
 
     fn new_from_seed(seed: u64) -> Self {
         let mut rng = StdRng::seed_from_u64(seed);
-        let planet_amout = rng.random_range(0..10);
+        let planet_amout = rng.random_range(5..10);
         let planet_seeds = (0..planet_amout).map(|_| rng.next_u64()).collect();
         let sun_seed = rng.next_u64();
         Self {
@@ -51,6 +53,8 @@ impl WorldGenerator for SolarSystemGenerator {
         bsn! {
             Name("SolarSystem")
             SolarSystem { generator }
+            Transform
+            InheritedVisibility
             Children[
                 @{ sun }
                 --

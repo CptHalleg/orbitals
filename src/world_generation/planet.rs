@@ -1,4 +1,5 @@
 use crate::follow_camera::FollowCameraTarget;
+use crate::orbiting::Orbit;
 use crate::orbiting::Orbiting;
 use crate::sphere_math::move_in_direction;
 use crate::world_generation::WorldGeneratable;
@@ -18,9 +19,10 @@ use bevy::shape::Cuboid;
 use bevy::shape::Sphere;
 use bevy::sprite::Text2d;
 use bevy::transform::components::Transform;
-use rand::Rng;
+use rand::RngExt;
 use rand::SeedableRng;
 use rand::rngs::StdRng;
+use std::f32::consts::TAU;
 
 #[derive(Component, Clone, Default)]
 pub struct Planet {
@@ -32,14 +34,59 @@ impl WorldGeneratable for Planet {}
 #[derive(Clone, Default)]
 pub struct PlanetGenerator {
     size: f32,
+    orbit: Orbit,
+}
+
+fn random_vector(rng: &mut StdRng) -> Vec3 {
+    loop {
+        let axis = Vec3::new(
+            rng.random_range(-1.0..1.0),
+            rng.random_range(-1.0..1.0),
+            rng.random_range(-1.0..1.0),
+        );
+
+        if axis.length_squared() > 0.0 {
+            return axis.normalize();
+        }
+    }
+}
+
+fn random_orbit(rng: &mut StdRng) -> Orbit {
+    let plane_normal = Vec3::new(
+        rng.random_range(-0.1..0.1),
+        1.0,
+        rng.random_range(-0.1..0.1),
+    )
+    .normalize();
+    let plane_normal = bevy::math::Dir3::new(plane_normal).unwrap();
+    let major_direction = loop {
+        let direction = random_vector(rng);
+        let direction = direction - plane_normal.as_vec3() * plane_normal.dot(direction);
+        if direction.length_squared() > 0.0001 {
+            break bevy::math::Dir3::new(direction.normalize()).unwrap();
+        }
+    };
+    let major_length = rng.random_range(300.0..5000.0);
+    let minor_length = major_length * rng.random_range(0.9..0.99);
+
+    Orbit::new(
+        plane_normal,
+        major_direction,
+        major_length,
+        minor_length,
+        rng.random_range(0.0..TAU),
+        rng.random_range(10.0..30.0),
+    )
 }
 
 impl WorldGenerator for PlanetGenerator {
     type Generatable = Planet;
     fn new_from_seed(seed: u64) -> Self {
         let mut rng = StdRng::seed_from_u64(seed);
+
         Self {
-            size: rng.next_u32() as f32,
+            size: rng.random_range(5..15) as f32,
+            orbit: random_orbit(&mut rng),
         }
     }
 
@@ -70,7 +117,9 @@ impl WorldGenerator for PlanetGenerator {
             MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(0.2, 0.5, 1.0)))
             Transform
             FollowCameraTarget::new(generator.size * 2.)
-            Orbiting()
+            Orbiting {
+                orbit: { generator.orbit.clone() }
+            }
             Children [
                 {sectors}
                 --
