@@ -104,7 +104,7 @@ impl WorldGenerator for PlanetGenerator {
             .into_iter()
             .map(|position| {
                 bsn! {
-                    Mesh3d(asset_value(Cuboid::new(1.0, 1.0, 1.0)))
+                    Mesh3d(asset_value(Sphere::new(0.5)))
                     MeshMaterial3d::<StandardMaterial>(asset_value(Color::srgb(0.75, 0.75, 0.8)))
                     Transform::from_translation(position)
                 }

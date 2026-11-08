@@ -1,6 +1,5 @@
 use crate::skybox::SkyboxConfig;
 use bevy::app::Update;
-use bevy::camera;
 use bevy::camera::Camera;
 use bevy::camera::Camera3d;
 use bevy::ecs::system::Commands;
@@ -22,14 +21,17 @@ use bevy::{
     time::Time,
     transform::{
         TransformSystems,
-        components::{GlobalTransform, Transform},
+        components::Transform,
     },
 };
 
 pub struct FollowCameraPlugin;
 impl Plugin for FollowCameraPlugin {
     fn build(&self, app: &mut bevy::app::App) {
-        app.add_systems(PostUpdate, follow_camera.after(TransformSystems::Propagate));
+        app.add_systems(
+            PostUpdate,
+            follow_camera.before(TransformSystems::Propagate),
+        );
         app.add_systems(Update, cycle_follow_camera_target);
     }
 }
@@ -67,7 +69,7 @@ fn follow_camera(
     keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
     mut cameras: Query<(&FollowCamera, &mut Transform)>,
-    mut targetables: Query<(&GlobalTransform, &mut FollowCameraTarget), Without<FollowCamera>>,
+    mut targetables: Query<(&Transform, &mut FollowCameraTarget), Without<FollowCamera>>,
 ) {
     let delta = time.delta_secs();
     let rotation_speed = 1.5;
@@ -105,7 +107,7 @@ fn follow_camera(
             targetable.radius += zoom_direction * zoom_speed * delta * (targetable.radius);
 
             let horizontal_radius = targetable.radius * targetable.pitch.cos();
-            let target_position = target_transform.translation();
+            let target_position = target_transform.translation;
             transform.translation = target_position
                 + Vec3::new(
                     horizontal_radius * targetable.yaw.sin(),
