@@ -1,6 +1,7 @@
 use bevy::color::Color;
 use bevy::ecs::component::Component;
 use bevy::ecs::hierarchy::ChildOf;
+use bevy::ecs::query;
 use bevy::ecs::system::Query;
 use bevy::ecs::system::Res;
 use bevy::gizmos::gizmos::Gizmos;
