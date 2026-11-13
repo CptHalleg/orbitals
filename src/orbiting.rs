@@ -92,11 +92,15 @@ pub struct Orbiting {
 }
 
 impl Predictable for Orbiting {
-    fn position_at(&self, time: f32) -> Vec3 {
+    fn predict_position(&self, time: f32) -> Vec3 {
         self.orbit.position(time)
     }
 
     fn cycle_duration(&self) -> f32 {
         TAU * self.orbit.period()
+    }
+
+    fn clone_box(&self) -> Box<dyn Predictable> {
+        Box::new(self.clone())
     }
 }
